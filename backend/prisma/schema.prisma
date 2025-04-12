@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // You can change this to your preferred database
+  url      = env("DATABASE_URL")
+}
+
+model Coin {
+  id                String   @id @default(uuid())
+  address           String   @unique
+  name              String
+  symbol            String
+  description       String?
+  totalSupply       String?
+  totalVolume       String?
+  volume24h         String?
+  marketCap         String?
+  marketCapDelta24h String?
+  createdAt         DateTime
+  creatorAddress    String?
+  uniqueHolders     Int?
+  transferCount     Int?
+  sentiment_similarity Float?
+  embed_similarity     Float?
+  finance_similarity    Float?
+  total_similarity       Float?
+
+  // Media content
+  mediaMimeType    String?
+  mediaOriginalUri String?
+  mediaPreviewUrl  String?
+
+  // Relations
+  creatorProfile  Profile?         @relation(fields: [creatorAddress], references: [address])
+  creatorEarnings CreatorEarning[]
+
+  // Timestamps
+  updatedAt DateTime @updatedAt
+  scrapedAt DateTime @default(now())
+
+  @@index([creatorAddress])
+}
+
+model Profile {
+  address   String  @id
+  handle    String?
+  avatarUrl String?
+
+  // Relations
+  coins        Coin[]
+
+  // Timestamps
+  updatedAt DateTime @updatedAt
+  scrapedAt DateTime @default(now())
+}
+
+model CreatorEarning {
+  id        String @id @default(uuid())
+  amountUsd String
+
+  // Relations
+  coinId String
+  coin   Coin   @relation(fields: [coinId], references: [id])
+
+  // Timestamps
+  updatedAt DateTime @updatedAt
+  scrapedAt DateTime @default(now())
+
+  @@index([coinId])
+}
