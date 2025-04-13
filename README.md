@@ -2,7 +2,7 @@
 
 ## 🚀 Project Description
 
-CloutChain is an advanced analytics platform that predicts the **virality** of Zora coins. The platform leverages **powerful attention models** to assign virality scores to coins — helping traders identify them before they gain widespread attention. Users can filter new/trending posts by virality score, visualise market data, and set up trading thresholds based on virality metrics. The platform combines **social media sentiment analysis** with historical price patterns to generate **actionable investment recommendations**, facilitating informed trading activities.
+CloutChain is an advanced analytics platform that predicts the **virality** of Zora coins. The platform leverages **powerful attention models** to assign virality scores to coins — helping traders identify them before they gain widespread attention. Users can filter trending posts by virality score, visualise market data, and set up trading thresholds based on virality metrics. The platform combines **social media sentiment analysis** with historical price patterns to generate **actionable investment recommendations**, facilitating informed trading activities.
 
 ## 📊 Project Overview
 
@@ -16,25 +16,11 @@ Users can explore trending content, and set custom virality thresholds for tradi
 
 ## 🔌 Sponsor Technology Usage
 
-Our project integrates Zora technology through the `@zoralabs/coins-sdk` package to access real-time token data and content information. We analyse Zora content for **virality prediction**, track token movements, and provide users with actionable insights — specifically optimised for the Zora ecosystem. This integration allows our platform to identify potentially viral content early and forecast market movements based on **social engagement patterns**.
+Cloutchain integrates Zora technology through the `@zoralabs/coins-sdk` package to access real-time token data and content information. We analyse Zora content for **virality prediction**, track token movements, and provide users with actionable insights — specifically optimised for the Zora ecosystem. This integration allows our platform to identify potentially viral content early and forecast market movements based on **social engagement patterns**.
 
 ## 🔧 Setup/Installation Instructions
 
-1. Clone the repository: `git clone git@github.com:siddharth-shringarpure/CloutChain.git`
-2. Install dependencies:
-   ```
-   npm install
-   cd frontend && npm install
-   cd backend && npm install
-   ```
-3. Set up environment variables (copy `.env.example` to `.env` in each directory)
-4. Start the development servers:
-   ```
-   # In separate terminals
-   cd frontend && npm run dev
-   cd backend && npm run dev
-   ```
-5. Open http://localhost:3000 in your browser
+`npm i; npm run dev` on both directories and `python3 server.py` on the server
 
 ## 💻 Technologies Used
 
