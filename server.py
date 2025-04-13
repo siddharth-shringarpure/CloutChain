@@ -10,6 +10,7 @@ from flask import Flask, request, jsonify
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import MinMaxScaler
 import math
+import easyocr
 import subprocess
 
 app = Flask(__name__)
@@ -22,12 +23,12 @@ with open('text_embedding_pipeline.pk', 'rb') as f:
     text_embedding_pipe = pickle.load(f)
 with open('sentiment_pipeline.pk', 'rb') as g:
     sentiment_pipe = pickle.load(g)
-with open('ocr.pk', 'rb') as h:
-    ocr_pipe = pickle.load(h)
 with open('img_embedding_model.pk', 'rb') as i:
     model = pickle.load(i)
 with open('img_embedding_preprocess.pk', 'rb') as j:
     preprocess = pickle.load(j)
+
+ocr_pipe = easyocr.Reader(['en'])
 
 # defining functions
 def ocr_img_from_url(img_url):
@@ -224,4 +225,5 @@ def predict():
 
 model, preprocess = clip.load("ViT-B/32", device = "cpu")
 if __name__ == "__main__":
+    torch.backends.mps.is_available = lambda: False  # Disable MPS explicitly
     app.run(debug=True)
