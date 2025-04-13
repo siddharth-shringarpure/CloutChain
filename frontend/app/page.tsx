@@ -5,32 +5,61 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowRight,
-  BarChart3,
-  BrainCircuit,
+  BarChart2,
+  Brain,
+  ChevronRight,
   Clock,
-  Filter,
+  Flame,
   LineChart,
+  Lock,
   Rocket,
-  TrendingUp,
   Zap,
 } from "lucide-react";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Header } from "@/components/custom/Header";
+import { Footer } from "@/components/custom/Footer";
+import { ScrollToTop } from "@/components/custom/ScrollToTop";
 
-export default function LandingPage() {
-  const [activeTab, setActiveTab] = useState("individuals");
+/**
+ * @fileoverview Main landing page component showcasing the platform's key features
+ * and functionality. Implements animated sections and responsive design.
+ */
+
+const FADE_UP = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4 },
+  },
+};
+
+const FADE_IN = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.3 },
+  },
+};
+
+const STAGGER_CONTAINER = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+// Neural Network Background component
+const NeuralBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Neural network animation effect
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -38,23 +67,30 @@ export default function LandingPage() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // Set canvas size
+    const updateCanvasSize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
 
+    updateCanvasSize();
+    window.addEventListener("resize", updateCanvasSize);
+
+    // Particle settings
     const particles: {
       x: number;
       y: number;
       size: number;
       speedX: number;
       speedY: number;
-      connections: number[];
     }[] = [];
-    const particleCount = Math.min(Math.floor(window.innerWidth / 10), 100);
+
+    const particleCount = Math.min(Math.floor(window.innerWidth / 20), 70);
     const connectionDistance = 150;
     const colors = [
-      "rgba(168, 85, 247, 0.5)",
-      "rgba(139, 92, 246, 0.5)",
-      "rgba(79, 70, 229, 0.5)",
+      "rgba(0, 132, 255, 0.4)",
+      "rgba(92, 221, 255, 0.4)",
+      "rgba(0, 180, 216, 0.4)",
     ];
 
     // Create particles
@@ -63,9 +99,8 @@ export default function LandingPage() {
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
         size: Math.random() * 2 + 1,
-        speedX: (Math.random() - 0.5) * 0.5,
-        speedY: (Math.random() - 0.5) * 0.5,
-        connections: [],
+        speedX: (Math.random() - 0.5) * 0.4,
+        speedY: (Math.random() - 0.5) * 0.4,
       });
     }
 
@@ -89,913 +124,568 @@ export default function LandingPage() {
         ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
         ctx.fill();
 
-        // Find connections
-        p.connections = [];
-        for (let j = 0; j < particles.length; j++) {
-          if (i === j) continue;
+        // Draw connections
+        for (let j = i + 1; j < particles.length; j++) {
           const p2 = particles[j];
           const distance = Math.sqrt(
             Math.pow(p.x - p2.x, 2) + Math.pow(p.y - p2.y, 2)
           );
+
           if (distance < connectionDistance) {
-            p.connections.push(j);
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(168, 85, 247, ${
-              1 - distance / connectionDistance
+            ctx.strokeStyle = `rgba(0, 132, 255, ${
+              0.2 - (distance / connectionDistance) * 0.15
             })`;
-            ctx.lineWidth = 0.5;
+            ctx.lineWidth = 0.8;
             ctx.stroke();
           }
         }
       }
+
+      // Optional: Add a small indicator dot in bottom right to confirm the canvas is active
+      ctx.beginPath();
+      ctx.arc(canvas.width - 10, canvas.height - 10, 3, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(0, 132, 255, 0.7)";
+      ctx.fill();
     };
 
     animate();
 
-    const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-
-    window.addEventListener("resize", handleResize);
-
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", updateCanvasSize);
     };
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-black text-white overflow-hidden">
-      {/* Neural network background */}
-      <canvas
-        ref={canvasRef}
-        className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
-      />
+    <canvas
+      ref={canvasRef}
+      className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-60 z-1"
+      style={{ display: "block", position: "absolute" }}
+    />
+  );
+};
 
-      {/* Gradient overlay */}
-      <div className="fixed top-0 left-0 w-full h-full bg-gradient-to-b from-black via-transparent to-black opacity-80 pointer-events-none z-0"></div>
+// TODO: Consider extracting animation constants to a separate config file
+// TODO: Add proper analytics tracking for user interactions
+// TODO: Implement proper error boundaries around motion components
 
-      {/* Content */}
-      <div className="relative z-10 flex flex-col min-h-screen">
-        {/* Header */}
-        <header className="px-4 lg:px-6 h-16 flex items-center justify-between border-b border-purple-900/30 backdrop-blur-sm bg-black/50">
-          <div className="flex items-center gap-2">
-            <BrainCircuit className="h-6 w-6 text-purple-500" />
-            <span className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-purple-600">
-              ZoraPredict
-            </span>
-          </div>
-          <nav className="hidden md:flex gap-6">
-            <Link
-              href="#features"
-              className="text-zinc-400 hover:text-purple-400 transition-colors"
-            >
-              Features
-            </Link>
-            <Link
-              href="#how-it-works"
-              className="text-zinc-400 hover:text-purple-400 transition-colors"
-            >
-              How It Works
-            </Link>
-            <Link
-              href="#pricing"
-              className="text-zinc-400 hover:text-purple-400 transition-colors"
-            >
-              Pricing
-            </Link>
-          </nav>
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              className="bg-white text-black hover:bg-zinc-700 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 transition-all duration-300 cursor-pointer"
-            >
-              Login
-            </Button>
-            <Button className="bg-purple-600 hover:bg-purple-700 relative overflow-hidden group cursor-pointer">
-              <span className="relative z-10">Sign Up</span>
-              <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-            </Button>
-          </div>
-        </header>
+/**
+ * Home component serving as the main landing page
+ * @returns {React.ReactNode} The rendered home page
+ */
+export default function Home(): React.ReactNode {
+  const router = useRouter();
+  const [coinLink, setCoinLink] = useState("");
+  const [email, setEmail] = useState("");
 
-        {/* Hero Section */}
-        <section className="px-4 py-12 md:py-24 lg:py-32 flex flex-col items-center text-center space-y-8 border-b border-purple-900/30">
-          <div className="space-y-4 max-w-3xl">
-            <div className="inline-block px-3 py-1 rounded-full bg-purple-900/30 text-purple-400 text-sm font-medium mb-4">
-              AI-Powered Virality Prediction
-            </div>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-fuchsia-500 to-indigo-400">
-                Predict
-              </span>{" "}
-              the Next Viral{" "}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-fuchsia-500 to-indigo-400">
-                Zora
-              </span>{" "}
-              Content
-            </h1>
-            <p className="text-xl text-zinc-400 max-w-[700px] mx-auto">
-              Our advanced AI analyzes patterns, engagement metrics, and
-              historical data to predict which Zora content will go viral before
-              anyone else knows.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button className="relative overflow-hidden group h-12 px-8 text-center cursor-pointer">
-              <span className="relative z-10">Get Started</span>
-              <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600"></span>
-              <span className="absolute inset-0 bg-gradient-to-r from-fuchsia-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-              <ArrowRight className="ml-2 h-4 w-4 relative z-10" />
-            </Button>
-            <Button
-              variant="outline"
-              className="border-purple-700/50 h-12 px-8 hover:bg-purple-900/20 transition-all duration-300 cursor-pointer"
-            >
-              View Demo
-            </Button>
-          </div>
+  const handleCoinSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    window.location.href = "/dashboard";
+  };
 
-          {/* Animated dashboard preview */}
-          <div className="relative w-full max-w-4xl mt-12 rounded-lg overflow-hidden border border-purple-900/50 shadow-[0_0_30px_rgba(168,85,247,0.15)]">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 z-10"></div>
-            <div className="absolute -inset-[1px] bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg z-0 animate-pulse"></div>
-            <div className="relative z-10 bg-zinc-900/90 p-1 rounded-lg">
-              <img
-                src="/dashboard.svg?height=600&width=1200"
-                width={1200}
-                height={600}
-                alt="ZoraPredict AI Dashboard Preview"
-                className="w-full object-cover rounded-md"
-              />
+  const handleEmailSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    window.location.href = "/dashboard";
+  };
 
-              {/* Overlay with AI elements */}
-              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
-                <div className="absolute top-4 right-4 bg-purple-900/70 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-white flex items-center">
-                  <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-                  AI Prediction Active
-                </div>
+  return (
+    <div className="flex min-h-screen flex-col">
+      <Header />
 
-                <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm p-2 rounded-lg border border-purple-500/30">
-                  <div className="text-xs text-left">
-                    <div className="text-purple-400 font-medium">
-                      Virality Score
-                    </div>
-                    <div className="text-white text-lg font-bold">87.6%</div>
-                    <div className="text-green-400 text-xs">
-                      +23.4% above average
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 w-full max-w-4xl mt-8">
-            <div className="bg-purple-900/20 backdrop-blur-sm border border-purple-900/30 rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-white mb-1">98%</div>
-              <div className="text-xs text-zinc-400">Prediction Accuracy</div>
-            </div>
-            <div className="bg-purple-900/20 backdrop-blur-sm border border-purple-900/30 rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-white mb-1">2.5x</div>
-              <div className="text-xs text-zinc-400">Average ROI</div>
-            </div>
-            <div className="bg-purple-900/20 backdrop-blur-sm border border-purple-900/30 rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-white mb-1">10K+</div>
-              <div className="text-xs text-zinc-400">Active Traders</div>
-            </div>
-            <div className="bg-purple-900/20 backdrop-blur-sm border border-purple-900/30 rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-white mb-1">5M+</div>
-              <div className="text-xs text-zinc-400">Predictions Made</div>
-            </div>
-          </div>
-        </section>
-
-        {/* Features Section */}
-        <section
-          id="features"
-          className="px-4 py-12 md:py-24 border-b border-purple-900/30 relative"
+      <main className="flex-1">
+        {/* Hero section with main value proposition */}
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={FADE_UP}
+          className="section bg-snow py-8 md:py-12 relative overflow-hidden"
         >
-          <div className="absolute top-0 left-0 w-full h-64 bg-gradient-radial from-purple-900/20 to-transparent"></div>
-          <div className="container mx-auto relative z-10">
-            <div className="text-center mb-12">
-              <div className="inline-block px-3 py-1 rounded-full bg-purple-900/30 text-purple-400 text-sm font-medium mb-4">
-                Powerful Capabilities
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
-                AI-Powered Features
-              </h2>
-              <p className="text-zinc-400 max-w-2xl mx-auto">
-                Our neural network analyzes thousands of data points to give you
-                the edge in the Zora ecosystem.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <Card className="bg-zinc-900/50 backdrop-blur-sm border-purple-900/50 hover:border-purple-500/50 transition-all duration-300 group overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-900/0 to-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-lg bg-purple-900/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <TrendingUp className="h-6 w-6 text-purple-400" />
+          <div className="absolute inset-0 bg-sky/5"></div>
+          <NeuralBackground />
+          <div className="container-tight px-4 md:px-6 relative z-10">
+            <div className="grid gap-8 lg:grid-cols-2 lg:gap-16 items-center">
+              <motion.div variants={FADE_IN} className="space-y-6 md:space-y-8">
+                <h1 className="font-display text-3xl md:text-4xl lg:text-5xl">
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-electric to-blue-500">
+                    Predict
+                  </span>{" "}
+                  the Next Viral Zora Content
+                </h1>
+                <p className="text-lg md:text-xl text-stone">
+                  Leverage AI-powered analytics to identify trending coins
+                  before they explode in popularity.
+                </p>
+                <motion.form
+                  onSubmit={handleCoinSubmit}
+                  variants={FADE_UP}
+                  className="flex flex-col sm:flex-row gap-4 max-w-full sm:max-w-md"
+                >
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Paste a Zora coin link"
+                      className="h-12 rounded-full"
+                      value={coinLink}
+                      onChange={(e) => setCoinLink(e.target.value)}
+                    />
                   </div>
-                  <CardTitle className="text-white group-hover:text-purple-400 transition-colors">
-                    Virality Prediction
-                  </CardTitle>
-                  <CardDescription className="text-zinc-400">
-                    Our AI analyzes 50+ factors to predict content virality with
-                    98% accuracy.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-
-              <Card className="bg-zinc-900/50 backdrop-blur-sm border-purple-900/50 hover:border-purple-500/50 transition-all duration-300 group overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-900/0 to-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-lg bg-purple-900/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <Filter className="h-6 w-6 text-purple-400" />
+                  <div className="w-full sm:w-auto">
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="rounded-full w-full sm:w-auto px-4 sm:px-8 bg-electric hover:bg-electric/90"
+                    >
+                      Predict Now
+                    </Button>
                   </div>
-                  <CardTitle className="text-white group-hover:text-purple-400 transition-colors">
-                    Neural Filtering
-                  </CardTitle>
-                  <CardDescription className="text-zinc-400">
-                    Advanced neural network filters content based on
-                    customizable virality thresholds.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+                </motion.form>
+              </motion.div>
 
-              <Card className="bg-zinc-900/50 backdrop-blur-sm border-purple-900/50 hover:border-purple-500/50 transition-all duration-300 group overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-900/0 to-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-lg bg-purple-900/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <Zap className="h-6 w-6 text-purple-400" />
-                  </div>
-                  <CardTitle className="text-white group-hover:text-purple-400 transition-colors">
-                    Quantum Trading
-                  </CardTitle>
-                  <CardDescription className="text-zinc-400">
-                    Set up automated trading based on AI-predicted virality
-                    thresholds.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-
-              <Card className="bg-zinc-900/50 backdrop-blur-sm border-purple-900/50 hover:border-purple-500/50 transition-all duration-300 group overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-900/0 to-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-lg bg-purple-900/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <Clock className="h-6 w-6 text-purple-400" />
-                  </div>
-                  <CardTitle className="text-white group-hover:text-purple-400 transition-colors">
-                    Real-Time Analysis
-                  </CardTitle>
-                  <CardDescription className="text-zinc-400">
-                    Millisecond scanning of new posts with our distributed
-                    neural network.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-
-              <Card className="bg-zinc-900/50 backdrop-blur-sm border-purple-900/50 hover:border-purple-500/50 transition-all duration-300 group overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-900/0 to-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-lg bg-purple-900/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <BarChart3 className="h-6 w-6 text-purple-400" />
-                  </div>
-                  <CardTitle className="text-white group-hover:text-purple-400 transition-colors">
-                    Sentiment Engine
-                  </CardTitle>
-                  <CardDescription className="text-zinc-400">
-                    NLP-powered sentiment analysis of comments and social
-                    signals.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-
-              <Card className="bg-zinc-900/50 backdrop-blur-sm border-purple-900/50 hover:border-purple-500/50 transition-all duration-300 group overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-900/0 to-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-lg bg-purple-900/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <Rocket className="h-6 w-6 text-purple-400" />
-                  </div>
-                  <CardTitle className="text-white group-hover:text-purple-400 transition-colors">
-                    Predictive Scheduling
-                  </CardTitle>
-                  <CardDescription className="text-zinc-400">
-                    Schedule trades with our AI that predicts optimal execution
-                    times.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+              {/* Hero image placeholder */}
+              <motion.div
+                variants={FADE_IN}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="relative h-[300px] md:h-[400px] w-full rounded-xl border bg-ghost p-2 shadow-sm"
+              >
+                <Image
+                  src="/dashboard.svg?height=400&width=600"
+                  alt="Dashboard Preview"
+                  width={600}
+                  height={400}
+                  className="h-full w-full rounded object-cover"
+                />
+              </motion.div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
-        {/* How It Works Section */}
-        <section
+        {/* Stats Section */}
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={STAGGER_CONTAINER}
+          className="py-6 sm:py-8 md:py-12 border-y border-ghost"
+        >
+          <div className="container-tight px-4 md:px-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              {[
+                // TODO: Add actual stats that are believable
+                { value: "1M+", label: "Predictions" },
+                { value: "500K+", label: "Posts analysed" },
+                { value: "£2B+", label: "Trading volume" },
+              ].map((stat, i) => (
+                <motion.div
+                  key={i}
+                  variants={FADE_UP}
+                  className="stat-card bg-snow p-3 sm:p-4 md:p-6 rounded-lg text-center"
+                >
+                  <div className="stat-value text-2xl md:text-3xl font-bold text-charcoal">
+                    {stat.value}
+                  </div>
+                  <div className="stat-label text-sm md:text-base">
+                    {stat.label}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </motion.section>
+
+        {/* How It Works */}
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={FADE_UP}
           id="how-it-works"
-          className="px-4 py-12 md:py-24 border-b border-purple-900/30 relative"
+          className="section-alt py-12 md:py-16 relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-radial from-indigo-900/10 to-transparent"></div>
-          <div className="container mx-auto relative z-10">
-            <div className="text-center mb-12">
-              <div className="inline-block px-3 py-1 rounded-full bg-purple-900/30 text-purple-400 text-sm font-medium mb-4">
-                The Technology
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
-                Neural Network Process
-              </h2>
-              <p className="text-zinc-400 max-w-2xl mx-auto">
-                Our proprietary AI uses advanced neural networks to predict
-                content virality with unprecedented accuracy.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto relative">
-              {/* Connection lines */}
-              {/* <div className="hidden md:block absolute top-1/2 left-1/4 w-1/2 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500"></div> */}
-
-              <div className="flex flex-col items-center text-center relative z-10">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center mb-6 relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-600 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <LineChart className="h-10 w-10 text-white relative z-10" />
-                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-2xl z-0 blur-sm opacity-70 group-hover:opacity-100 transition-opacity"></div>
-                </div>
-                <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-purple-900/30 animate-pulse"></div>
-                <h3 className="text-xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
-                  1. Data Collection
-                </h3>
-                <p className="text-zinc-400">
-                  Our quantum neural network continuously scans the Zora
-                  ecosystem, collecting millions of data points.
-                </p>
-              </div>
-
-              <div className="flex flex-col items-center text-center relative z-10">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center mb-6 relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-600 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <BrainCircuit className="h-10 w-10 text-white relative z-10" />
-                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-2xl z-0 blur-sm opacity-70 group-hover:opacity-100 transition-opacity"></div>
-                </div>
-                <div className="absolute -top-3 -right-3 w-6 h-6 rounded-full bg-indigo-900/30 animate-pulse delay-300"></div>
-                <h3 className="text-xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
-                  2. Neural Processing
-                </h3>
-                <p className="text-zinc-400">
-                  Our proprietary AI analyzes patterns, engagement metrics, and
-                  historical data through 17 neural layers.
-                </p>
-              </div>
-
-              <div className="flex flex-col items-center text-center relative z-10">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center mb-6 relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-600 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <Zap className="h-10 w-10 text-white relative z-10" />
-                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-2xl z-0 blur-sm opacity-70 group-hover:opacity-100 transition-opacity"></div>
-                </div>
-                <div className="absolute -bottom-3 -right-3 w-10 h-10 rounded-full bg-purple-900/30 animate-pulse delay-700"></div>
-                <h3 className="text-xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
-                  3. Predictive Output
-                </h3>
-                <p className="text-zinc-400">
-                  Get real-time virality scores and automated trading signals
-                  with 98% prediction accuracy.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Pricing Section */}
-        <section
-          id="pricing"
-          className="px-4 py-12 md:py-24 border-b border-purple-900/30 relative"
-        >
-          <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-radial from-purple-900/20 to-transparent"></div>
-          <div className="container mx-auto relative z-10">
-            <div className="text-center mb-12">
-              <div className="inline-block px-3 py-1 rounded-full bg-purple-900/30 text-purple-400 text-sm font-medium mb-4">
-                Pricing Plans
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
-                Choose Your Neural Network
-              </h2>
-              <p className="text-zinc-400 max-w-2xl mx-auto">
-                Select the AI power level that best fits your trading strategy
-                and goals.
-              </p>
-            </div>
-
-            <Tabs
-              defaultValue="individuals"
-              className="max-w-4xl mx-auto"
-              onValueChange={setActiveTab}
+          <div className="absolute inset-0 bg-sky/5"></div>
+          <NeuralBackground />
+          <div className="container-tight px-4 md:px-6 relative z-10">
+            <motion.div
+              variants={FADE_IN}
+              className="flex flex-col max-w-2xl mx-auto text-center mb-12 md:mb-16"
             >
-              <div className="flex justify-center mb-8">
-                <TabsList className="bg-zinc-900/50 backdrop-blur-sm border border-purple-900/30">
-                  <TabsTrigger
-                    value="individuals"
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white"
-                  >
-                    Individual Traders
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="teams"
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white"
-                  >
-                    Trading Teams
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-
-              <TabsContent value="individuals" className="space-y-8">
-                <div className="grid md:grid-cols-3 gap-8">
-                  <Card className="bg-zinc-900/50 backdrop-blur-sm border-purple-900/50 hover:border-purple-500/50 transition-all duration-300 group overflow-hidden relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-900/0 to-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <CardHeader>
-                      <CardTitle className="text-white">Neural Basic</CardTitle>
-                      <div className="mt-4 flex items-baseline text-zinc-100">
-                        <span className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
-                          $29
-                        </span>
-                        <span className="ml-1 text-sm text-zinc-400">
-                          /month
-                        </span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span>{" "}
-                          Virality predictions
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span> Basic
-                          neural filtering
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span> 100
-                          predictions/day
-                        </li>
-                        <li className="flex items-center text-zinc-500">
-                          <span className="mr-2">✗</span> Quantum trading
-                        </li>
-                        <li className="flex items-center text-zinc-500">
-                          <span className="mr-2">✗</span> Sentiment engine
-                        </li>
-                      </ul>
-                    </CardContent>
-                    <CardFooter>
-                      <Button className="w-full bg-white hover:bg-zinc-700 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-indigo-600 transition-all duration-300">
-                        Get Started
-                      </Button>
-                    </CardFooter>
-                  </Card>
-
-                  <Card className="bg-zinc-900/50 backdrop-blur-sm border-purple-500 relative group overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 to-purple-900/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <div className="absolute -inset-[0.5px] bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg z-0 animate-pulse"></div>
-                    <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">
-                      MOST POPULAR
-                    </div>
-                    <CardHeader>
-                      <CardTitle className="text-white">Neural Pro</CardTitle>
-                      <div className="mt-4 flex items-baseline text-zinc-100">
-                        <span className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
-                          $79
-                        </span>
-                        <span className="ml-1 text-sm text-zinc-400">
-                          /month
-                        </span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span>{" "}
-                          Advanced virality predictions
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span> Neural
-                          filtering
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span>{" "}
-                          Unlimited predictions
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span> Basic
-                          quantum trading
-                        </li>
-                        <li className="flex items-center text-zinc-500">
-                          <span className="mr-2">✗</span> Sentiment engine
-                        </li>
-                      </ul>
-                    </CardContent>
-                    <CardFooter>
-                      <Button className="w-full relative overflow-hidden group">
-                        <span className="relative z-10">Get Started</span>
-                        <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600"></span>
-                        <span className="absolute inset-0 bg-gradient-to-r from-fuchsia-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                      </Button>
-                    </CardFooter>
-                  </Card>
-
-                  <Card className="bg-zinc-900/50 backdrop-blur-sm border-purple-900/50 hover:border-purple-500/50 transition-all duration-300 group overflow-hidden relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-900/0 to-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <CardHeader>
-                      <CardTitle className="text-white">
-                        Neural Enterprise
-                      </CardTitle>
-                      <div className="mt-4 flex items-baseline text-zinc-100">
-                        <span className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
-                          $199
-                        </span>
-                        <span className="ml-1 text-sm text-zinc-400">
-                          /month
-                        </span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span> Quantum
-                          virality predictions
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span>{" "}
-                          Advanced neural filtering
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span>{" "}
-                          Unlimited predictions
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span>{" "}
-                          Advanced quantum trading
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span> Full
-                          sentiment engine
-                        </li>
-                      </ul>
-                    </CardContent>
-                    <CardFooter>
-                      <Button className="w-full bg-white hover:bg-zinc-700 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-indigo-600 transition-all duration-300">
-                        Get Started
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="teams" className="space-y-8">
-                <div className="grid md:grid-cols-3 gap-8">
-                  <Card className="bg-zinc-900/50 backdrop-blur-sm border-purple-900/50 hover:border-purple-500/50 transition-all duration-300 group overflow-hidden relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-900/0 to-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <CardHeader>
-                      <CardTitle className="text-white">Team Neural</CardTitle>
-                      <div className="mt-4 flex items-baseline text-zinc-100">
-                        <span className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
-                          $99
-                        </span>
-                        <span className="ml-1 text-sm text-zinc-400">
-                          /month
-                        </span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <p className="text-sm text-zinc-400">
-                        Up to 5 team members
-                      </p>
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span>{" "}
-                          Virality predictions
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span> Basic
-                          neural filtering
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span> 500
-                          predictions/day
-                        </li>
-                        <li className="flex items-center text-zinc-500">
-                          <span className="mr-2">✗</span> Quantum trading
-                        </li>
-                      </ul>
-                    </CardContent>
-                    <CardFooter>
-                      <Button className="w-full bg-zinc-800 hover:bg-zinc-700 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-indigo-600 transition-all duration-300">
-                        Get Started
-                      </Button>
-                    </CardFooter>
-                  </Card>
-
-                  <Card className="bg-zinc-900/50 backdrop-blur-sm border-purple-500 relative group overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 to-purple-900/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <div className="absolute -inset-[0.5px] bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg z-0 animate-pulse"></div>
-                    <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">
-                      MOST POPULAR
-                    </div>
-                    <CardHeader>
-                      <CardTitle className="text-white">Team Pro</CardTitle>
-                      <div className="mt-4 flex items-baseline text-zinc-100">
-                        <span className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
-                          $249
-                        </span>
-                        <span className="ml-1 text-sm text-zinc-400">
-                          /month
-                        </span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <p className="text-sm text-zinc-400">
-                        Up to 10 team members
-                      </p>
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span>{" "}
-                          Advanced virality predictions
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span> Neural
-                          filtering
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span>{" "}
-                          Unlimited predictions
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span> Basic
-                          quantum trading
-                        </li>
-                      </ul>
-                    </CardContent>
-                    <CardFooter>
-                      <Button className="w-full relative overflow-hidden group">
-                        <span className="relative z-10">Get Started</span>
-                        <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600"></span>
-                        <span className="absolute inset-0 bg-gradient-to-r from-fuchsia-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                      </Button>
-                    </CardFooter>
-                  </Card>
-
-                  <Card className="bg-zinc-900/50 backdrop-blur-sm border-purple-900/50 hover:border-purple-500/50 transition-all duration-300 group overflow-hidden relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-900/0 to-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <CardHeader>
-                      <CardTitle className="text-white">
-                        Team Enterprise
-                      </CardTitle>
-                      <div className="mt-4 flex items-baseline text-zinc-100">
-                        <span className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
-                          $499
-                        </span>
-                        <span className="ml-1 text-sm text-zinc-400">
-                          /month
-                        </span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <p className="text-sm text-zinc-400">
-                        Unlimited team members
-                      </p>
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span> Quantum
-                          virality predictions
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span>{" "}
-                          Advanced neural filtering
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span>{" "}
-                          Unlimited predictions
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span>{" "}
-                          Advanced quantum trading
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span> Full
-                          sentiment engine
-                        </li>
-                        <li className="flex items-center">
-                          <span className="mr-2 text-green-500">✓</span> Neural
-                          API access
-                        </li>
-                      </ul>
-                    </CardContent>
-                    <CardFooter>
-                      <Button className="w-full bg-zinc-800 hover:bg-zinc-700 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-indigo-600 transition-all duration-300">
-                        Get Started
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="px-4 py-12 md:py-24 relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-purple-900/10 via-indigo-900/5 to-black"></div>
-          <div className="container mx-auto max-w-4xl relative z-10">
-            <div className="bg-gradient-to-r from-purple-900/40 to-indigo-900/40 backdrop-blur-md rounded-2xl p-8 md:p-12 text-center border border-purple-500/20 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-indigo-500"></div>
-              <div className="absolute -top-24 -left-24 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl"></div>
-              <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl"></div>
-
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-fuchsia-400 to-indigo-400">
-                Harness the Power of AI Prediction
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-electric to-blue-500">
+                How It Works
               </h2>
-              <p className="text-zinc-300 mb-8 max-w-2xl mx-auto">
-                Join thousands of traders who are already leveraging our neural
-                network to predict viral Zora content before anyone else.
+              <p className="mt-2 md:mt-4 text-base md:text-lg text-stone">
+                Our AI-powered platform analyses multiple signals to predict
+                social content virality with precision and executes trades at
+                optimal times
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button className="relative overflow-hidden group h-12 px-8">
-                  <span className="relative z-10">Start Free Trial</span>
-                  <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600"></span>
-                  <span className="absolute inset-0 bg-gradient-to-r from-fuchsia-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                  <ArrowRight className="ml-2 h-4 w-4 relative z-10" />
-                </Button>
+            </motion.div>
+            <motion.div
+              variants={STAGGER_CONTAINER}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
+            >
+              {[
+                {
+                  icon: Brain,
+                  title: "Analyse Content",
+                  desc: "Our AI analyses image, text, and sentiment to identify viral potential",
+                },
+                {
+                  icon: BarChart2,
+                  title: "Score & Compare",
+                  desc: "Content is scored based on vector similarity and historical data",
+                },
+                {
+                  icon: Flame,
+                  title: "Real-time Scan",
+                  desc: "Continuous monitoring of fresh coins to catch trends early",
+                },
+                {
+                  icon: LineChart,
+                  title: "Auto-Trade",
+                  desc: "Set thresholds and let our platform execute trades automatically",
+                },
+                {
+                  icon: Clock,
+                  title: "Real-Time Analysis",
+                  desc: "Millisecond scanning of new posts with our distributed neural network",
+                },
+                {
+                  icon: Rocket,
+                  title: "Predictive Scheduling",
+                  desc: "Schedule trades with our AI that predicts optimal execution times",
+                },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  variants={FADE_UP}
+                  className="flex flex-col items-start space-y-4 rounded-lg p-4 md:p-6 bg-white/90 backdrop-blur-sm"
+                >
+                  <div className="rounded-full bg-sky p-4">
+                    <item.icon className="h-5 w-5 md:h-6 md:w-6 text-electric" />
+                  </div>
+                  <h3 className="text-lg md:text-xl font-medium">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm md:text-base text-stone">{item.desc}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </motion.section>
+
+        {/* Trending Posts Feed */}
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={FADE_UP}
+          id="trending"
+          className="section py-12 md:py-16"
+        >
+          <div className="container-tight px-4 md:px-6">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-start lg:items-end mb-8 md:mb-12 gap-4">
+              <motion.div variants={FADE_IN} className="max-w-full md:max-w-xl">
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2 md:mb-4 bg-clip-text text-transparent bg-gradient-to-r from-electric to-blue-500">
+                  Trending Now
+                </h2>
+                <p className="mt-2 text-base md:text-lg text-stone">
+                  See what&apos;s gaining momentum in real-time across the Zora
+                  ecosystem
+                </p>
+              </motion.div>
+              <motion.div
+                variants={FADE_IN}
+                className="flex flex-wrap gap-2 justify-start md:justify-end w-full md:w-auto"
+              >
+                {["Highest Score", "Volume", "Recent"].map((btn) => (
+                  <Button
+                    key={btn}
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full border-ghost text-charcoal whitespace-nowrap"
+                  >
+                    {btn}
+                  </Button>
+                ))}
+              </motion.div>
+            </div>
+            <motion.div
+              variants={STAGGER_CONTAINER}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8"
+            >
+              {[1, 2, 3].map((i) => (
+                <motion.div
+                  key={i}
+                  variants={FADE_UP}
+                  className="rounded-xl border bg-ghost text-charcoal shadow-sm overflow-hidden h-full flex flex-col"
+                >
+                  <div className="relative">
+                    <Image
+                      src={`/dashboard.svg?height=200&width=400&text=Coin%20${i}`}
+                      alt={`Trending Coin ${i}`}
+                      width={400}
+                      height={200}
+                      className="w-full object-cover"
+                    />
+                    <div className="absolute right-3 top-3 rounded-full bg-seafoam px-3 py-1 text-xs font-medium text-mint">
+                      {85 + i}% Virality
+                    </div>
+                  </div>
+                  <div className="p-4 md:p-5 flex-grow flex flex-col">
+                    <h3 className="text-base md:text-lg font-medium">
+                      Creator Coin #{i}
+                    </h3>
+                    <div className="mt-3 flex items-center justify-between">
+                      <div className="text-xs md:text-sm text-stone">
+                        Volume: {0.5 * i} ETH
+                      </div>
+                      <div className="text-xs md:text-sm font-medium text-mint">
+                        +{20 * i}% 24h
+                      </div>
+                    </div>
+                    <div className="mt-auto pt-4">
+                      <Link href="/dashboard">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full rounded-full border-electric text-electric hover:bg-sky text-xs md:text-sm"
+                        >
+                          Track this Coin
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+            <motion.div variants={FADE_UP} className="mt-8 flex justify-center">
+              <Link href="/dashboard">
                 <Button
                   variant="outline"
-                  className="border-purple-500/30 h-12 px-8 hover:bg-purple-900/20 transition-all duration-300"
+                  className="gap-1 rounded-full border-electric text-electric hover:bg-sky"
                 >
-                  Schedule Neural Demo
+                  View all trending <ChevronRight className="h-4 w-4" />
                 </Button>
-              </div>
-            </div>
+              </Link>
+            </motion.div>
           </div>
-        </section>
+        </motion.section>
 
-        {/* Footer */}
-        <footer className="px-4 py-6 md:py-8 border-t border-purple-900/30 backdrop-blur-sm bg-black/50">
-          <div className="container mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              <div>
-                <h3 className="font-semibold mb-4 text-white">Product</h3>
-                <ul className="space-y-2 text-sm text-zinc-400">
-                  <li>
-                    <Link
-                      href="#"
-                      className="hover:text-purple-400 transition-colors"
-                    >
-                      Features
-                    </Link>
+        {/* Auto-Trade Dashboard Preview */}
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={FADE_UP}
+          id="auto-trade"
+          className="section py-12 md:py-16"
+        >
+          <div className="container-tight px-4 md:px-6">
+            <div className="grid gap-8 lg:grid-cols-2 lg:gap-16 items-center">
+              <motion.div
+                variants={FADE_IN}
+                className="space-y-6 md:space-y-8 order-2 lg:order-1"
+              >
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-electric to-blue-500">
+                  Auto-Trade Dashboard
+                </h2>
+                <p className="text-base md:text-lg text-stone">
+                  Set your parameters once and let our platform execute trades
+                  automatically when conditions are met.
+                </p>
+                <ul className="space-y-4 md:space-y-5">
+                  <li className="flex items-start gap-3">
+                    <div className="rounded-full bg-sky p-2 mt-0.5">
+                      <Lock className="h-4 w-4 md:h-5 md:w-5 text-electric" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm md:text-base">
+                        Safety thresholds
+                      </p>
+                      <p className="text-xs md:text-sm text-stone">
+                        Set maximum spend and stop-loss parameters
+                      </p>
+                    </div>
                   </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="hover:text-purple-400 transition-colors"
-                    >
-                      Pricing
-                    </Link>
+                  <li className="flex items-start gap-3">
+                    <div className="rounded-full bg-sky p-2 mt-0.5">
+                      <BarChart2 className="h-4 w-4 md:h-5 md:w-5 text-electric" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm md:text-base">
+                        Virality thresholds
+                      </p>
+                      <p className="text-xs md:text-sm text-stone">
+                        Only trade when virality score exceeds your minimum
+                      </p>
+                    </div>
                   </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="hover:text-purple-400 transition-colors"
-                    >
-                      Neural API
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="hover:text-purple-400 transition-colors"
-                    >
-                      Integrations
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-4 text-white">Resources</h3>
-                <ul className="space-y-2 text-sm text-zinc-400">
-                  <li>
-                    <Link
-                      href="#"
-                      className="hover:text-purple-400 transition-colors"
-                    >
-                      Documentation
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="hover:text-purple-400 transition-colors"
-                    >
-                      Neural Guides
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="hover:text-purple-400 transition-colors"
-                    >
-                      AI Blog
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="hover:text-purple-400 transition-colors"
-                    >
-                      Support
-                    </Link>
+                  <li className="flex items-start gap-3">
+                    <div className="rounded-full bg-sky p-2 mt-0.5">
+                      <Clock className="h-4 w-4 md:h-5 md:w-5 text-electric" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm md:text-base">
+                        Time-based conditions
+                      </p>
+                      <p className="text-xs md:text-sm text-stone">
+                        Set time windows for trading activity
+                      </p>
+                    </div>
                   </li>
                 </ul>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-4 text-white">Company</h3>
-                <ul className="space-y-2 text-sm text-zinc-400">
-                  <li>
-                    <Link
-                      href="#"
-                      className="hover:text-purple-400 transition-colors"
-                    >
-                      About
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="hover:text-purple-400 transition-colors"
-                    >
-                      Careers
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="hover:text-purple-400 transition-colors"
-                    >
-                      Contact
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="hover:text-purple-400 transition-colors"
-                    >
-                      Partners
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-4 text-white">Legal</h3>
-                <ul className="space-y-2 text-sm text-zinc-400">
-                  <li>
-                    <Link
-                      href="#"
-                      className="hover:text-purple-400 transition-colors"
-                    >
-                      Privacy
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="hover:text-purple-400 transition-colors"
-                    >
-                      Terms
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="hover:text-purple-400 transition-colors"
-                    >
-                      Security
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div className="mt-8 pt-8 border-t border-purple-900/30 flex flex-col md:flex-row justify-between items-center">
-              <div className="flex items-center gap-2 mb-4 md:mb-0">
-                <BrainCircuit className="h-5 w-5 text-purple-500" />
-                <span className="font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
-                  ZoraPredict
-                </span>
-              </div>
-              <p className="text-sm text-zinc-500">
-                © 2025 ZoraPredict. All rights reserved.
-              </p>
+                <div className="pt-2 flex justify-center sm:justify-start">
+                  <Link href="/dashboard">
+                    <Button className="gap-2 rounded-full bg-electric hover:bg-electric/90 w-full sm:w-auto">
+                      Explore Auto-Trade <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </motion.div>
+              <motion.div
+                variants={FADE_IN}
+                transition={{ duration: 0.4 }}
+                className="relative h-[250px] md:h-[400px] w-full rounded-xl border bg-ghost p-2 shadow-sm order-1 lg:order-2"
+              >
+                <Image
+                  src="/dashboard.svg?height=400&width=600&text=Auto-Trade%20Dashboard"
+                  alt="Auto-Trade Dashboard"
+                  width={600}
+                  height={400}
+                  className="h-full w-full rounded object-cover"
+                />
+              </motion.div>
             </div>
           </div>
-        </footer>
-      </div>
+        </motion.section>
+
+        {/* Tech Explained */}
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={FADE_UP}
+          id="docs"
+          className="section-alt py-12 md:py-16 relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-sky/5"></div>
+          <NeuralBackground />
+          <div className="container-tight px-4 md:px-6 relative z-10">
+            <motion.div
+              variants={FADE_IN}
+              className="flex flex-col max-w-2xl mx-auto text-center mb-12"
+            >
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2 md:mb-4 bg-clip-text text-transparent bg-gradient-to-r from-electric to-blue-500">
+                The Technology
+              </h2>
+              <p className="mt-2 text-base md:text-lg text-stone">
+                Our platform leverages cutting-edge AI to deliver accurate
+                predictions
+              </p>
+            </motion.div>
+            <motion.div
+              variants={STAGGER_CONTAINER}
+              className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8"
+            >
+              {[
+                {
+                  title: "Vector Embeddings",
+                  desc: "We analyse visual and textual content using advanced embedding techniques to identify patterns that correlate with virality.",
+                },
+                {
+                  title: "Sentiment Analysis",
+                  desc: "Our AI evaluates social signals and community sentiment to gauge potential market interest and momentum.",
+                },
+                {
+                  title: "Smart Scoring",
+                  desc: "Beyond simple metrics, our algorithm considers multiple factors to provide a comprehensive virality score.",
+                },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  variants={FADE_UP}
+                  className="bento-card p-4 sm:p-6 bg-white/90 backdrop-blur-sm rounded-lg shadow-sm h-full flex flex-col"
+                >
+                  <h3 className="text-lg md:text-xl font-medium mb-2 sm:mb-3">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm md:text-base text-stone">{item.desc}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </motion.section>
+
+        {/* CTA Section */}
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={FADE_UP}
+          id="try-it"
+          className="section-alt py-12 md:py-16 relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-sky/5"></div>
+          <NeuralBackground />
+          <div className="container-tight px-4 md:px-6 relative z-10">
+            <div className="grid gap-8 md:grid-cols-2 items-center">
+              <motion.div variants={FADE_IN} className="space-y-4 md:space-y-6">
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold">
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-electric to-blue-500">
+                    Kickstart
+                  </span>{" "}
+                  your virality edge today
+                </h2>
+                <p className="text-base md:text-lg text-stone">
+                  Become a top Zora trader with our AI-powered platform and get
+                  ahead of the curve.
+                </p>
+                <form
+                  onSubmit={handleEmailSubmit}
+                  className="flex flex-col sm:flex-row gap-4 max-w-full sm:max-w-md"
+                >
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Enter your email"
+                      className="h-12 rounded-full"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                  <div className="w-full sm:w-auto">
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="rounded-full w-full sm:w-auto px-4 sm:px-8 bg-electric hover:bg-electric/90"
+                    >
+                      Get Started
+                    </Button>
+                  </div>
+                </form>
+              </motion.div>
+              <motion.div
+                variants={FADE_IN}
+                className="relative h-[250px] md:h-[300px] w-full rounded-xl border bg-ghost p-2 shadow-sm"
+              >
+                <Image
+                  src="/dashboard.svg?height=300&width=500&text=Dashboard%20Preview"
+                  alt="Dashboard Preview"
+                  width={500}
+                  height={300}
+                  className="h-full w-full rounded object-cover"
+                />
+              </motion.div>
+            </div>
+          </div>
+        </motion.section>
+      </main>
+
+      {/* Using the Footer component */}
+      <Footer />
+
+      {/* Add ScrollToTop component */}
+      <ScrollToTop />
     </div>
   );
 }

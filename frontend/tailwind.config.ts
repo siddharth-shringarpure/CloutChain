@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
-const config: Config = {
-  darkMode: "class",
+const config = {
+  darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
@@ -9,6 +9,7 @@ const config: Config = {
     "./src/**/*.{ts,tsx}",
     "*.{js,ts,jsx,tsx,mdx}",
   ],
+  prefix: "",
   theme: {
     container: {
       center: true,
@@ -52,23 +53,23 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Custom cyberpunk theme colors
-        cyber: {
-          purple: "#805AD5",
-          cyan: "#00E0FF",
-          green: "#00E396",
-          pink: "#FF4976",
-          yellow: "#FFD600",
-          dark: {
-            DEFAULT: "#131722",
-            deeper: "#0f1218",
-          },
-        },
+        electric: "hsl(217, 91%, 60%)", // Electric Blue #3B82F6
+        snow: "#FAFAFA", // Snow White
+        charcoal: "#2E2E2E", // Charcoal
+        ghost: "#EDEDED", // Ghost Grey
+        stone: "#7D7D7D", // Stone Grey
+        sky: "#E5F0FF", // Sky Tint
+        mint: "#10b981", // Neon Mint
+        seafoam: "#d1fae5", // Seafoam
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: ["var(--font-jakarta)", "system-ui", "sans-serif"],
+        display: ["var(--font-grotesk)", "system-ui", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {
@@ -79,23 +80,14 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "pulse-glow": {
-          "0%, 100%": {
-            boxShadow: "0 0 5px 0 rgba(128, 90, 213, 0.2)",
-          },
-          "50%": {
-            boxShadow: "0 0 20px 5px rgba(90,213,0.2)",
-          },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
       },
     },
   },
   plugins: [require("tailwindcss-animate")],
-};
+} satisfies Config;
 
 export default config;
