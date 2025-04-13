@@ -1,26 +1,272 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Add a higher scroll padding to ensure better offset */
+    scroll-padding-top: 5rem;
+  }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Add scroll margin to sections to account for fixed header */
+  [id] {
+    scroll-margin-top: 5rem; /* Increased from 4rem for better spacing */
+  }
 
-@media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Base Colors */
+    --background: 0 0% 98%; /* Snow White #FAFAFA */
+    --foreground: 0 0% 18%; /* Charcoal #2E2E2E */
+
+    /* Card & Component Colors */
+    --card: 0 0% 93%; /* Ghost Grey #EDEDED */
+    --card-foreground: 0 0% 18%; /* Charcoal #2E2E2E */
+
+    /* Popover Colors */
+    --popover: 0 0% 98%; /* Snow White #FAFAFA */
+    --popover-foreground: 0 0% 18%; /* Charcoal #2E2E2E */
+
+    /* Primary Action Colors */
+    --primary: 217 91% 60%; /* Electric Blue #3B82F6 */
+    --primary-foreground: 0 0% 98%; /* Snow White #FAFAFA */
+
+    /* Secondary/Background Colors */
+    --secondary: 214 100% 95%; /* Sky Tint #E5F0FF */
+    --secondary-foreground: 217 91% 60%; /* Electric Blue #3B82F6 */
+
+    /* Muted/Subdued Colors */
+    --muted: 0 0% 93%; /* Ghost Grey #EDEDED */
+    --muted-foreground: 0 0% 49%; /* Stone Grey #7D7D7D */
+
+    /* Accent Colors */
+    --accent: 217 91% 60%; /* Electric Blue #3B82F6 */
+    --accent-foreground: 0 0% 98%; /* Snow White #FAFAFA */
+
+    /* Destructive/Negative Colors */
+    --destructive: 0 84% 60%; /* Crimson #EF4444 */
+    --destructive-foreground: 0 0% 98%; /* Snow White #FAFAFA */
+
+    /* Border & Input Colors */
+    --border: 0 0% 93%; /* Ghost Grey #EDEDED */
+    --input: 0 0% 93%; /* Ghost Grey #EDEDED */
+    --ring: 217 91% 60%; /* Electric Blue #3B82F6 */
+
+    /* Border Radius */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Base Colors */
+    --background: 0 0% 10%; /* Dark mode background */
+    --foreground: 0 0% 98%; /* Snow White #FAFAFA */
+
+    /* Card & Component Colors */
+    --card: 0 0% 15%; /* Dark mode card */
+    --card-foreground: 0 0% 98%; /* Snow White #FAFAFA */
+
+    /* Popover Colors */
+    --popover: 0 0% 15%; /* Dark mode popover */
+    --popover-foreground: 0 0% 98%; /* Snow White #FAFAFA */
+
+    /* Primary Action Colors - Keeping Electric Blue */
+    --primary: 217 91% 60%; /* Electric Blue #3B82F6 */
+    --primary-foreground: 0 0% 98%; /* Snow White #FAFAFA */
+
+    /* Secondary/Background Colors */
+    --secondary: 0 0% 15%; /* Dark mode secondary */
+    --secondary-foreground: 0 0% 98%; /* Snow White #FAFAFA */
+
+    /* Muted/Subdued Colors */
+    --muted: 0 0% 15%; /* Dark mode muted */
+    --muted-foreground: 0 0% 65%; /* Lighter Stone Grey for dark mode */
+
+    /* Accent Colors - Keeping Electric Blue */
+    --accent: 217 91% 60%; /* Electric Blue #3B82F6 */
+    --accent-foreground: 0 0% 98%; /* Snow White #FAFAFA */
+
+    /* Destructive/Negative Colors */
+    --destructive: 0 84% 60%; /* Crimson #EF4444 */
+    --destructive-foreground: 0 0% 98%; /* Snow White #FAFAFA */
+
+    /* Border & Input Colors */
+    --border: 0 0% 20%; /* Dark mode border */
+    --input: 0 0% 20%; /* Dark mode input */
+    --ring: 217 91% 60%; /* Electric Blue #3B82F6 */
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-grotesk), system-ui, sans-serif;
+    letter-spacing: -0.025em;
+    color: #2e2e2e; /* Charcoal */
+  }
+  h1 {
+    font-size: 2.25rem;
+    font-weight: 500;
+    line-height: 1.1;
+  }
+  @media (min-width: 640px) {
+    h1 {
+      font-size: 3rem;
+    }
+  }
+  @media (min-width: 768px) {
+    h1 {
+      font-size: 3.75rem;
+    }
+  }
+  h2 {
+    font-size: 1.875rem;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+  @media (min-width: 640px) {
+    h2 {
+      font-size: 2.25rem;
+    }
+  }
+  .dark h1,
+  .dark h2,
+  .dark h3,
+  .dark h4,
+  .dark h5,
+  .dark h6 {
+    color: #fafafa; /* Snow White for dark mode */
+  }
+}
+
+@layer components {
+  .stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background-color: #ededed; /* Ghost Grey */
+    border-radius: 0.5rem;
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  .stat-value {
+    font-size: 1.875rem;
+    font-family: var(--font-grotesk), system-ui, sans-serif;
+    font-weight: 500;
+    color: #2e2e2e; /* Charcoal */
+  }
+  .stat-label {
+    font-size: 0.875rem;
+    color: #7d7d7d; /* Stone Grey */
+    margin-top: 0.25rem;
+  }
+  .section {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+    background-color: #fafafa; /* Snow White */
+  }
+  @media (min-width: 768px) {
+    .section {
+      padding-top: 6rem;
+      padding-bottom: 6rem;
+    }
+  }
+  .section-alt {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+    background-color: #ededed; /* Ghost Grey */
+  }
+  @media (min-width: 768px) {
+    .section-alt {
+      padding-top: 6rem;
+      padding-bottom: 6rem;
+    }
+  }
+  .container-tight {
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+    max-width: 85rem;
+  }
+  @media (min-width: 640px) {
+    .container-tight {
+      padding-right: 1rem;
+      padding-left: 1rem;
+    }
+  }
+  @media (min-width: 768px) {
+    .container-tight {
+      padding-right: 1.5rem;
+      padding-left: 1.5rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .container-tight {
+      padding-right: 2rem;
+      padding-left: 2rem;
+    }
+  }
+  .bento-grid {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .bento-card {
+    border-radius: 0.75rem;
+    border: 1px solid hsl(var(--border));
+    background-color: #ededed; /* Ghost Grey */
+    padding: 1.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Add new utility classes for the color scheme */
+  .text-positive {
+    color: #10b981; /* Neon Mint */
+  }
+  .bg-positive-light {
+    background-color: #d1fae5; /* Seafoam */
+  }
+  .text-negative {
+    color: #ef4444; /* Crimson */
+  }
+  .bg-negative-light {
+    background-color: #fee2e2; /* Blush Tint */
+  }
+  .text-accent-pop {
+    color: #d8b4fe; /* Lavender Mist */
+  }
+  .text-coral {
+    color: #fca5a5; /* Coral Pink */
+  }
+
+  /* Dark mode overrides */
+  .dark .stat-card {
+    background-color: hsl(var(--card));
+  }
+  .dark .stat-value {
+    color: #fafafa; /* Snow White */
+  }
+  .dark .section {
+    background-color: hsl(var(--background));
+  }
+  .dark .section-alt {
+    background-color: hsl(var(--secondary));
+  }
+  .dark .bento-card {
+    background-color: hsl(var(--card));
+  }
 }
