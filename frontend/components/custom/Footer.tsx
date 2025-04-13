@@ -13,7 +13,7 @@ import { motion } from "framer-motion";
 const ANIMATION_DURATION = 0.5;
 const HOVER_SCALE = 1.05;
 
-export function Footer(): React.ReactElement {
+export function Footer() {
   // Navigation links for the footer
   const footerLinks = [
     { href: "/about", label: "About" },
@@ -29,14 +29,14 @@ export function Footer(): React.ReactElement {
       viewport={{ once: true }}
       className="border-t bg-snow"
     >
-      <div className="container-tight px-4 py-8">
+      <div className="container-tight px-4 py-6 sm:py-8">
         {/* Upper section with logo and navigation */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           transition={{ duration: ANIMATION_DURATION }}
           viewport={{ once: true }}
-          className="flex justify-between items-center"
+          className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0"
         >
           {/* Logo section */}
           <motion.div
@@ -49,7 +49,7 @@ export function Footer(): React.ReactElement {
           </motion.div>
 
           {/* Navigation links */}
-          <div className="flex gap-6">
+          <div className="flex gap-4 sm:gap-6">
             {footerLinks.map((link, i) => (
               <motion.div
                 key={link.href}
@@ -61,7 +61,7 @@ export function Footer(): React.ReactElement {
               >
                 <Link
                   href={link.href}
-                  className="text-sm text-stone transition-colors hover:text-charcoal"
+                  className="text-xs sm:text-sm text-stone transition-colors hover:text-charcoal"
                 >
                   {link.label}
                 </Link>
@@ -76,7 +76,7 @@ export function Footer(): React.ReactElement {
           whileInView={{ y: 0, opacity: 1 }}
           transition={{ duration: ANIMATION_DURATION, delay: 0.3 }}
           viewport={{ once: true }}
-          className="flex justify-between items-center mt-6 pt-4 border-t"
+          className="flex flex-col sm:flex-row justify-between items-center mt-6 pt-4 border-t gap-4 sm:gap-0"
         >
           {/* Platform description */}
           <motion.p
@@ -84,7 +84,7 @@ export function Footer(): React.ReactElement {
             whileInView={{ opacity: 1 }}
             transition={{ duration: ANIMATION_DURATION, delay: 0.4 }}
             viewport={{ once: true }}
-            className="text-sm text-stone max-w-md"
+            className="text-xs sm:text-sm text-stone max-w-md text-center sm:text-left"
           >
             AI-powered virality prediction and auto-trading platform. Helping
             you discover trending content before anyone else.

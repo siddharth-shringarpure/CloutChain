@@ -20,9 +20,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Header } from "@/components/custom/Header";
-import { Footer } from "@/components/custom/Footer";
-import { ScrollToTop } from "@/components/custom/ScrollToTop";
+import { Header, Footer, ScrollToTop } from "@/components/custom";
 
 /**
  * @fileoverview Main landing page component showcasing the platform's key features
