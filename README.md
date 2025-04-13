@@ -29,4 +29,18 @@ Cloutchain integrates Zora technology through the `@zoralabs/coins-sdk` package 
 - **AI**: Flask (Python)
 - **Blockchain**: Zora SDK, MetaMask Integration
 
+## Demo
+https://youtu.be/x-mFdJyCFXw
+
 ## 📷 Screenshots
+**Landing Page**
+![Landing Page](/assets/Landing_Page.png)
+
+**Dashboard view 1**
+![Dashboard View 1](/assets/Dashboard_1.png)
+
+**Dashboard view 2**
+![Dashboard View 2](/assets/Dashboard_2.png)
+
+**Trade Coin**
+![Trade Coin](/assets/Trade_Coin.png)
