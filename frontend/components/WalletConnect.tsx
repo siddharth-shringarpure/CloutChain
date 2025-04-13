@@ -285,7 +285,7 @@ export default function WalletConnect() {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               onClick={() => setIsWalletModalOpen(true)}
-              className="bg-[#4A8CFF] text-white hover:bg-[#357ce7] focus:outline-none focus:ring-2 focus:ring-[#4A8CFF] shadow-sm"
+              className="!rounded-xl bg-[#4A8CFF] text-white hover:bg-[#357ce7] focus:outline-none focus:ring-2 focus:ring-[#4A8CFF] shadow-sm"
             >
               <Wallet className="mr-2 h-4 w-4" />
               Connect Wallet
