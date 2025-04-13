@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CloutChain
 
-## Getting Started
+## 🚀 Project Description
 
-First, run the development server:
+CloutChain is an advanced analytics platform that predicts the **virality** of Zora coins. The platform leverages **powerful attention models** to assign virality scores to coins — helping traders identify them before they gain widespread attention. Users can filter new/trending posts by virality score, visualise market data, and set up trading thresholds based on virality metrics. The platform combines **social media sentiment analysis** with historical price patterns to generate **actionable investment recommendations**, facilitating informed trading activities.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 📊 Project Overview
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+CloutChain consists of three main components:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Virality Prediction Engine**: AI models that score Zora content based on likelihood to become viral
+2. **Frontend Dashboard**: Interactive application with filters for trending posts and virality thresholds
+3. **Trading Automation**: System that enables users to set buy/sell parameters based on virality scores
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Users can explore trending content, and set custom virality thresholds for trading actions.
 
-## Learn More
+## 🔌 Sponsor Technology Usage
 
-To learn more about Next.js, take a look at the following resources:
+Our project integrates Zora technology through the `@zoralabs/coins-sdk` package to access real-time token data and content information. We analyse Zora content for **virality prediction**, track token movements, and provide users with actionable insights — specifically optimised for the Zora ecosystem. This integration allows our platform to identify potentially viral content early and forecast market movements based on **social engagement patterns**.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔧 Setup/Installation Instructions
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Clone the repository: `git clone git@github.com:siddharth-shringarpure/CloutChain.git`
+2. Install dependencies:
+   ```
+   npm install
+   cd frontend && npm install
+   cd backend && npm install
+   ```
+3. Set up environment variables (copy `.env.example` to `.env` in each directory)
+4. Start the development servers:
+   ```
+   # In separate terminals
+   cd frontend && npm run dev
+   cd backend && npm run dev
+   ```
+5. Open http://localhost:3000 in your browser
 
-## Deploy on Vercel
+## 💻 Technologies Used
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Frontend**: Next.js, TypeScript, TailwindCSS, Framer Motion, wagmi, ethers
+- **Backend**: Node.js, Express, Prisma
+- **AI**: Flask (Python)
+- **Blockchain**: Zora SDK, MetaMask Integration
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📷 Screenshots
